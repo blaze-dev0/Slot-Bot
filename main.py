@@ -121,7 +121,7 @@ async def on_message(message):
 @bot.command()
 async def help(ctx):
     embed = discord.Embed(description="**,create** - Use To Create Slot\n**,add** - Use To Add User In Slot\n**,remove** - Use To Remove User In SLot\n**,renew** - Use To Renew Slot",color=0xFFFF00)
-    embed.set_thumbnail(url=ctx.guild.icon_url)
+    embed.set_thumbnail(url=ctx.guild.icon.url)
     embed.set_author(name="Slot Bot Help Menu")
     await ctx.send(embed=embed,delete_after=30)
  
@@ -181,7 +181,7 @@ async def renew(ctx,member: discord.Member = None,channel: discord.TextChannel=N
      embed = discord.Embed(description="""Your Slot Rules""",color=0xFFFF00)
 
      embed.set_author(name="Slot Rules")
-     embed.set_thumbnail(url=f"{ctx.guild.icon_url}")
+     embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
 
      await channel.send(embed=embed)
      embed = discord.Embed(description=f'**Slot Owner:** {member.mention}\n**End:** <t:{int(yoyo)}:R>',color=0xFFFF00)
@@ -241,7 +241,7 @@ async def create(ctx,member: discord.Member=None,yoyo: int = None,cx=None,*,x=No
     embed = discord.Embed(description="""Your Slot Rules *""",color=0xFFFF00)
 
     embed.set_author(name="Slot Rules")
-    embed.set_thumbnail(url=f"{ctx.guild.icon_url}")
+    embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
 
     await a.send(embed=embed)
 
@@ -271,5 +271,5 @@ async def create(ctx,member: discord.Member=None,yoyo: int = None,cx=None,*,x=No
    
     with open("data.json", "w") as file:
         json.dump(data, file,indent=4)
-
-bot.run("Your Bot Token")
+  
+bot.run("ODk4ODAxNjk5MDEwMDE1Mjcz.GD3P9g.1cLL0si65bHVD4mQcT2-9vtEcBnR-kifoQ2Vb0")
