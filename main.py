@@ -181,7 +181,7 @@ async def renew(ctx,member: discord.Member = None,channel: discord.TextChannel=N
      embed = discord.Embed(description="""Your Slot Rules""",color=0xFFFF00)
 
      embed.set_author(name="Slot Rules")
-     embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
+     embed.set_thumbnail(url=f"{ctx.guild.icon}")
 
      await channel.send(embed=embed)
      embed = discord.Embed(description=f'**Slot Owner:** {member.mention}\n**End:** <t:{int(yoyo)}:R>',color=0xFFFF00)
@@ -241,7 +241,7 @@ async def create(ctx,member: discord.Member=None,yoyo: int = None,cx=None,*,x=No
     embed = discord.Embed(description="""Your Slot Rules *""",color=0xFFFF00)
 
     embed.set_author(name="Slot Rules")
-    embed.set_thumbnail(url=f"{ctx.guild.icon.url}")
+    embed.set_thumbnail(url=f"{ctx.guild.icon}")
 
     await a.send(embed=embed)
 
