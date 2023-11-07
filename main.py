@@ -1,8 +1,9 @@
 import discord 
 from discord.ext import commands , tasks
-import time
+import datetime
 import json
 import os
+from colorama import Fore
 intents = discord.Intents().all()
 bot = commands.Bot(command_prefix=',', intents = intents)
 bot.remove_command("help")
@@ -28,26 +29,45 @@ async def expire():
     except FileNotFoundError:
         data = []
 
-    nowtime = int(time.time())
+    nowtime = datetime.datetime.now()
+    nt = nowtime.strftime("%Y%m%d")
     remove = []
 
     for xd in data:
         for item in xd:
-            if nowtime >= item["endtime"]:
-                for item in data:
-                        if item in data:
-                            data.remove(item)
-                            with open("data.json", "w") as file:
-                                json.dump(data, file, indent=4)
-                user = bot.get_user(item["userid"])
-                channel = bot.get_channel(item["channelid"])
-                guild = bot.get_guild(hmm["guildid"])
+            slottime = item["endtime"]
+            st = datetime.datetime.fromtimestamp(int(slottime))
+            print(st.strftime("%Y%m%d"))
+            finalse = st.strftime("%Y%m%d")
+            print(f"Slot end {finalse}")
+            print(f"now time {nt}")
+            print(nt >= finalse)
 
-                if user and channel:
+            if nt >= finalse:
+                
+                with open("data.json", "w") as file:
+                    json.dump(data, file, indent=4)
+                
+                channel = bot.get_channel(item["channelid"])
+                guild = bot.get_guild(int(hmm["guildid"]))
+                member = guild.get_member(item["userid"])
+
+                
+
+                if member and channel:
+                    print(member.id)
                     await channel.send(f"Slot expired")
-                    role = discord.utils.get(guild.roles, id=int(rid))
-                    await user.remove_roles(role)
-                    await channel.set_permissions(user, send_messages=False)
+                    role = discord.utils.get(guild.roles, id=rid)
+                    print(role)
+                    await member.remove_roles(role)
+                    await channel.set_permissions(member, send_messages=False)
+                    print(xd)
+                    data.remove(xd)
+                    with open("./data.json","w") as nice:
+                        json.dump(data, nice,indent=4)
+
+
+
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
@@ -66,7 +86,7 @@ async def on_message(message):
             if not data:
                 dataz = {
                     "channelid": message.channel.id,
-                    "time": time.time(),
+                    "time": datetime.datetime.now().timestamp(),
                     "count": 2
                 }
                 data.append(dataz)
@@ -79,12 +99,18 @@ async def on_message(message):
                 if message.channel.id == c["channelid"]:
                     nice = True
                     print(c["time"])
-                    print(time.time())
-                    nowt = time.time()
-                    slotdata = time.strftime("%Y-%m-d", time.gmtime(c["time"]))
-                    checkexp = time.strftime("%Y-%m-d", time.gmtime(nowt))
+                    print(datetime.datetime.now().timestamp())
+                    nowt = datetime.datetime.now().timestamp()
+                    slotdata = int(c["time"])
+                    print(slotdata)
+                    sl = datetime.datetime.fromtimestamp(slotdata)
+                    slot = sl.strftime("%Y%m%d")
+                    cx = datetime.datetime.now()
+                    print(cx.timestamp())
+                    nowtime = cx.strftime("%Y%m%d")
+                    
 
-                    if checkexp == slotdata:
+                    if slot == nowtime:
                         xxx = c["count"]
                         if c["count"] >= 3:
                             channel = bot.get_channel(c["channelid"])
@@ -97,7 +123,7 @@ async def on_message(message):
                             json.dump(data, file, indent=4)
                         return
                     else:
-                        c["time"] = time.time()
+                        c["time"] = datetime.datetime.now().timestamp()
                         c["count"] = 2
                         with open("pingcount.json", "w") as file:
                             json.dump(data, file, indent=4)
@@ -105,7 +131,7 @@ async def on_message(message):
             if not nice:
                 datazx = {
                     "channelid": message.channel.id,
-                    "time": time.time(),
+                    "time": datetime.datetime.now().timestamp(),
                     "count": 2
                 }
                 data.append(datazx)
@@ -121,13 +147,33 @@ async def on_message(message):
 @bot.command()
 async def help(ctx):
     embed = discord.Embed(description="**,create** - Use To Create Slot\n**,add** - Use To Add User In Slot\n**,remove** - Use To Remove User In SLot\n**,renew** - Use To Renew Slot",color=0xFFFF00)
-    embed.set_thumbnail(url=ctx.guild.icon.url)
+    embed.set_thumbnail(url=ctx.guild.icon)
     embed.set_author(name="Slot Bot Help Menu")
     await ctx.send(embed=embed,delete_after=30)
  
 @bot.command()
 @commands.has_role(int(staff))
 async def add(ctx,member: discord.Member=None, channel: discord.TextChannel = None):
+
+    rr = []
+
+    with open("./data.json","r") as rr:
+        rr = json.load(rr)
+
+    ftf = False
+
+    for x in rr:
+        for xx in x:
+            if (xx["channelid"] == channel.id):
+                ftf = True
+
+    if (ftf == False):
+        await ctx.send("Slot Not In DataBase")
+        return
+
+                
+
+                
 
     
     if (member == False):
@@ -141,58 +187,93 @@ async def add(ctx,member: discord.Member=None, channel: discord.TextChannel = No
 
 @bot.command()
 @commands.has_role(int(staff))
-async def renew(ctx,member: discord.Member = None,channel: discord.TextChannel=None,yoyo: int = None,cx=None,):
-     print("ru")
-     if (member == None):
+async def renew(ctx,member: discord.Member = None,channel: discord.TextChannel=None,yoyo: int = None,cx=None):
+     
+
+    rr = []
+
+    with open("./data.json","r") as rr:
+        rr = json.load(rr)
+
+    ftf = False
+
+    for x in rr:
+        for xx in x:
+            if (xx["channelid"] == channel.id):
+                ftf = True
+
+    if (ftf == False):
+        await ctx.send("Slot Not In DataBase")
+        return
+                
+    print("ru")
+    if (member == None):
         await ctx.reply("Member Not Found")
         return
 
-     if (channel == None):
+    if (channel == None):
         await ctx.reply("Channel Not Found")
         return
 
-     if (cx.lower() == "d"):
-         yoyo = (yoyo * 24 * 60 * 60) + time.time()
-     elif (cx.lower() == "m"):
-         yoyo = (yoyo * 30 * 24 * 60 * 60) + time.time()
-     else:
+    if (cx.lower() == "d"):
+         yoyo = (yoyo * 24 * 60 * 60) + datetime.datetime.now().timestamp()
+    elif (cx.lower() == "m"):
+         yoyo = (yoyo * 30 * 24 * 60 * 60) + datetime.datetime.now().timestamp()
+    else:
          await ctx.reply("Use valid Formate: ,add @user 1 m his Slot")
 
-     await channel.set_permissions(member,view_channel=True,send_messages=True,mention_everyone=True)
-     role = discord.utils.get(ctx.guild.roles, id=int(rid))
-     await member.add_roles(role)
-     print("ruw")
-     async for message in channel.history(limit=1000):
-         await message.delete()
-     dataz = {
+    await channel.set_permissions(member,view_channel=True,send_messages=True,mention_everyone=True)
+    role = discord.utils.get(ctx.guild.roles, id=int(rid))
+    await member.add_roles(role)
+    print("ruw")
+    async for message in channel.history(limit=1000):
+        await message.delete()
+    dataz = {
          "endtime": yoyo,
          "userid": member.id,
          "channelid": channel.id
          },
-     try:
+    try:
         with open("data.json", "r") as file:
             data = json.load(file)
-     except FileNotFoundError:
+    except FileNotFoundError:
         data = []
         data.append(dataz)
         with open("data.json", "w") as file:
             json.dump(data, file,indent=4)
      
-     embed = discord.Embed(description="""Your Slot Rules""",color=0xFFFF00)
+    embed = discord.Embed(description="""Your Slot Rules""",color=0xFFFF00)
 
-     embed.set_author(name="Slot Rules")
-     embed.set_thumbnail(url=f"{ctx.guild.icon}")
+    embed.set_author(name="Slot Rules")
+    embed.set_thumbnail(url=f"{ctx.guild.icon}")
 
-     await channel.send(embed=embed)
-     embed = discord.Embed(description=f'**Slot Owner:** {member.mention}\n**End:** <t:{int(yoyo)}:R>',color=0xFFFF00)
-     embed.set_footer(text=ctx.guild.name)
-     embed.set_author(name=member)
-     await channel.send(embed=embed)
-     await ctx.reply(f"successfully renew Slot {channel.mention}")
+    await channel.send(embed=embed)
+    embed = discord.Embed(description=f'**Slot Owner:** {member.mention}\n**End:** <t:{int(yoyo)}:R>',color=0xFFFF00)
+    embed.set_footer(text=ctx.guild.name)
+    embed.set_author(name=member)
+    await channel.send(embed=embed)
+    await ctx.reply(f"successfully renew Slot {channel.mention}")
+
 
 @bot.command()
 @commands.has_role(int(staff))
 async def remove(ctx,member: discord.Member=None, channel: discord.TextChannel = None):
+
+    rr = []
+
+    with open("./data.json","r") as rr:
+        rr = json.load(rr)
+
+    ftf = False
+
+    for x in rr:
+        for xx in x:
+            if (xx["channelid"] == channel.id):
+                ftf = True
+
+    if (ftf == False):
+        await ctx.send("Slot Not In DataBase")
+        return
 
     if (member == False):
         await ctx.reply("Member Not Found")
@@ -202,6 +283,38 @@ async def remove(ctx,member: discord.Member=None, channel: discord.TextChannel =
 
     await channel.set_permissions(member, send_messages=True,mention_everyone=False)
     await ctx.reply("successfully removed")
+
+
+@bot.command()
+@commands.has_role(int(staff))
+async def revoke(ctx,member: discord.Member=None, channel: discord.TextChannel = None):
+
+    rr = []
+
+    with open("./data.json","r") as rr:
+        rr = json.load(rr)
+
+    ftf = False
+
+    for x in rr:
+        for xx in x:
+            if (xx["channelid"] == channel.id):
+                ftf = True
+
+    if (ftf == False):
+        await ctx.send("Slot Not In DataBase")
+        return
+
+    if (member == False):
+        await ctx.reply("Member Not Found")
+
+    if (channel == False):
+        await ctx.reply("Channel Not Found")
+
+    await channel.set_permissions(member, send_messages=True,mention_everyone=False)
+    await ctx.reply("successfully removed")
+
+
 
 @bot.command()
 @commands.has_role(int(staff))
@@ -241,14 +354,14 @@ async def create(ctx,member: discord.Member=None,yoyo: int = None,cx=None,*,x=No
     embed = discord.Embed(description="""Your Slot Rules *""",color=0xFFFF00)
 
     embed.set_author(name="Slot Rules")
-    embed.set_thumbnail(url=f"{ctx.guild.icon}")
+    embed.set_thumbnail(url=ctx.guild.icon)
 
     await a.send(embed=embed)
 
     if (cx.lower() == "d"):
-        yoyo = (yoyo * 24 * 60 * 60) + time.time()
+        yoyo = (yoyo * 24 * 60 * 60) + datetime.datetime.now().timestamp()
     elif (cx.lower() == "m"):
-        yoyo = (yoyo * 30 * 24 * 60 * 60) + time.time()
+        yoyo = (yoyo * 30 * 24 * 60 * 60) + datetime.datetime.now().timestamp()
     else:
         await ctx.reply("Use valid Formate: ,add @user 1 m his Slot")
         
@@ -272,4 +385,4 @@ async def create(ctx,member: discord.Member=None,yoyo: int = None,cx=None,*,x=No
     with open("data.json", "w") as file:
         json.dump(data, file,indent=4)
   
-bot.run("your bot token")
+bot.run("Your bot Token")
