@@ -1,6 +1,6 @@
 {
-        "staffrole": "your staff role id", 
-        "premiumeroleid": "your premium role id",
-        "guildid": " Your guild id",
-        "categoryid": "your category id" 
+        "staffrole": 123, 
+        "premiumeroleid": 123,
+        "guildid": 123,
+        "categoryid": 123 
 }
